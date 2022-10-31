@@ -1,38 +1,40 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { Bcrypt } from "../bcrypt/bcrypt";
-import { UsuarioService } from "../../usuario/services/usuario.service";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsuarioService } from '../../usuario/services/usuario.service';
+import { Bcrypt } from '../bcrypt/bcrypt';
 
 @Injectable()
 export class AuthService {
-    constructor (
+  constructor(
     private usuarioService: UsuarioService,
-    private jwService: JwtService,
+    private jwtService: JwtService,
     private bcrypt: Bcrypt
-){}
+  ) { }
 
-async validateUser (username : string, password: string) {
-    const bucarUsuario = await this.usuarioService.findByUsuario(username)
+  async validateUser(username: string, password: string): Promise<any> {
+    const buscaUsuario = await this.usuarioService.findByUsuario(username)
 
-    if (!bucarUsuario)
-    throw new HttpException('Usuario não encontrado!', HttpStatus.NOT_FOUND);
+    if (!buscaUsuario)
+        throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
+        
+    const match = await this.bcrypt.compararSenhas(password ,buscaUsuario.senha)
 
-    const match = await this.bcrypt.compararSenhas(bucarUsuario.senha, password);
-    if (bucarUsuario && match){
-        const {senha , ... result} = bucarUsuario
-        return result; 
+    if (buscaUsuario && match) {
+      const { senha, ...result } = buscaUsuario;
+      return result;
     }
-    return null
-}
-    async login (usuarioLogin: any){
-        const paylod = {
-            username: usuarioLogin.usuario,
-            sub: 'blogpessoal'
-        };
+    return null;
+  }
 
-        return {
-            usuario: usuarioLogin.usuario,
-            token: `Bearer ${this.jwService.sign(paylod)}`,
-        };
-    }
+  async login(usuarioLogin: any) {
+
+    const payload = { username: usuarioLogin.usuario, sub: "blogpessoal" };
+
+    return {
+      usuario: usuarioLogin.usuario,
+      token: `Bearer ${this.jwtService.sign(payload)}`,
+    };
+    
+  }
+
 }

@@ -5,10 +5,12 @@ import { UsuarioController } from "./controllers/usuario.controller";
 import { Usuario } from "./entities/usuario.entity";
 import { UsuarioService } from "./services/usuario.service";
 
+
 @Module({
     imports: [TypeOrmModule.forFeature([Usuario])],
-    providers:[UsuarioService, Bcrypt],
+    providers: [UsuarioService, Bcrypt],
     controllers: [UsuarioController],
-    exports: [UsuarioService]
+    exports: [UsuarioService],
 })
+
 export class UsuarioModule {}

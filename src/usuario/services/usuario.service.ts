@@ -1,56 +1,53 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Usuario } from '../entities/usuario.entity';
-import { Bcrypt } from '../../auth/bcrypt/bcrypt';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Bcrypt } from "../../auth/bcrypt/bcrypt";
+import { Repository } from "typeorm";
+import { Usuario } from "../entities/usuario.entity";
+
 
 @Injectable()
 export class UsuarioService {
-    constructor(
+    constructor (
         @InjectRepository(Usuario)
         private usuarioRepository: Repository<Usuario>,
         private bcrypt: Bcrypt
-    ) { }
+    ) {}
 
-    async findByUsuario(usuario: string): Promise<Usuario> {
+    async findByUsuario(usuario: string): Promise<Usuario | undefined> {
         return await this.usuarioRepository.findOne({
             where: {
                 usuario: usuario
             }
-        })
+        });
     }
 
     async findAll(): Promise<Usuario[]> {
-        return await this.usuarioRepository.find(
-            {
-                relations:{
-                    postagem: true
-                }
-            }
-        );
-
-    }
-
-    async findById(id: number): Promise<Usuario> {
-
-        let usuario = await this.usuarioRepository.findOne({
-            where: {
-                id
-            },
-            relations: {
+        return await this.usuarioRepository.find({
+            relations:{
                 postagem: true
             }
         });
+    }
+    
+   async findById(id: number): Promise<Usuario> {
 
-        if (!usuario)
-            throw new HttpException('Usuario não encontrado!', HttpStatus.NOT_FOUND);
+    let usuario = await this.usuarioRepository.findOne({
+        where: {
+            id
+        },
+        relations: {
+            postagem: true
+        }
+    });
 
-        return usuario;
+    if (!usuario)
+        throw new HttpException('Usuario Não encontrado!', HttpStatus.NOT_FOUND);
+    return usuario;
 
     }
 
     async create(usuario: Usuario): Promise<Usuario> {
-        
+
         let buscaUsuario = await this.findByUsuario(usuario.usuario);
 
         if (!buscaUsuario) {
@@ -70,12 +67,11 @@ export class UsuarioService {
         if (!updateUsuario)
             throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
 
-        if (buscaUsuario && buscaUsuario.id != usuario.id)
+        if (buscaUsuario && buscaUsuario.id !== usuario.id)
             throw new HttpException('Usuário (e-mail) já Cadastrado!', HttpStatus.BAD_REQUEST);
 
-        usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha);
+        usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha)
         return await this.usuarioRepository.save(usuario);
-
+   
     }
-
 }
