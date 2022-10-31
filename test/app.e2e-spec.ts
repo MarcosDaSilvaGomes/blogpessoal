@@ -1,17 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { INestApplication } from '@nestjs/common';
+
 
 describe('Testes dos Módulos Usuários e Auth (e2e)', () => {
   let app: INestApplication;
   let usuarioId: any;
-  let token: any
+  let token: any;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [TypeOrmModule.forRoot({
+      imports: [
+        TypeOrmModule.forRoot({
         type: 'mysql',
         host: 'localhost',
         port: 3306,
